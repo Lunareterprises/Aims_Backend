@@ -22,6 +22,7 @@ module.exports.AddCustomer = async (req, res) => {
                     message: "Insufficient parameters"
                 })
             }
+            console.log("email : ", cu_email)
             let checkCust = await model.CheckCustomer(u_id, cu_email);
             if (checkCust.length > 0) {
                 return res.send({
@@ -36,8 +37,8 @@ module.exports.AddCustomer = async (req, res) => {
             if (addcustomer.affectedRows > 0) {
 
                 var customer_id = addcustomer.insertId
-                console.log(customer_id, "cus_iddd");
-                if (contact_person) {
+                if (contact_person.trim()) {
+                    console.log(contact_person, "contact_person");
                     const contactPersons = JSON.parse(contact_person);
                     console.log(contactPersons);
 
