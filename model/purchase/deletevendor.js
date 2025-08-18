@@ -13,3 +13,22 @@ module.exports.RemoveVendors = async (vendor_id, user_id) => {
     var data = await query(Query, [vendor_id, user_id]);
     return data;
 };
+
+
+module.exports.RemoveContactus = async (vendor_id) => {
+    const Query = `DELETE FROM vendor_contact_person WHERE vcp_vendor_id = ?`;
+    const data = await query(Query, [vendor_id]);
+    return data;
+}
+
+module.exports.RemoveVendorBankDetails = async (vendor_id) => {
+    const Query = `DELETE FROM vendors_bank_details WHERE vbd_vendor_id = ?`;
+    const data = await query(Query, [vendor_id]);
+    return data;
+}
+
+module.exports.RemoveVendorDocuments = async (vendor_id) => {
+    const Query = `DELETE FROM vendors_documents WHERE vd_vendor_id = ?`;
+    const data = await query(Query, [vendor_id]);
+    return data;
+}

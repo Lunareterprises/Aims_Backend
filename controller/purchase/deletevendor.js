@@ -14,6 +14,9 @@ module.exports.DeleteVendors = async (req, res) => {
         if (checkVendors.length > 0) {
             let removeVendors = await model.RemoveVendors(vendor_id, u_id);
             if (removeVendors.affectedRows > 0) {
+                await model.RemoveContactus(vendor_id);
+                await model.RemoveVendorBankDetails(vendor_id);
+                await model.RemoveVendorDocuments(vendor_id);
                 return res.send({
                     result: true,
                     message: "Vendors removed successfully"
