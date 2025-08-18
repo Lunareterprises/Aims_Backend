@@ -15,14 +15,14 @@ module.exports.EditVendor = async (req, res) => {
                 });
             }
 
-            var { ve_id, ve_salutation, ve_first_name, ve_last_name, ve_company_name, ve_display_name,
+            var { ve_id, ve_salutation, ve_first_name, ve_last_name, ve_company_name, ve_display_name, ve_tax_treatment, ve_source_of_supply,
                 ve_email, ve_phone, ve_mobile, ve_pan_no, ve_currency, ve_opening_balance, ve_payment_terms,
                 ve_tds, ve_enable_portal, ve_portal_language, ve_department, ve_designation, ve_website, ve_remarks,
                 ve_b_addr_attention, ve_b_addr_country, ve_b_addr_address, ve_b_addr_city, ve_b_addr_state, ve_b_addr_pincode,
                 ve_b_addr_phone, ve_b_addr_fax_number, ve_s_addr_attention, ve_s_addr_country, ve_s_addr_address, ve_s_addr_city,
                 ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number, contact_persons } = fields;
 
-            if ( !ve_id) {
+            if (!ve_id) {
                 return res.send({
                     result: false,
                     message: "insufficient parameter"
@@ -47,6 +47,20 @@ module.exports.EditVendor = async (req, res) => {
                         condition = `set ve_first_name ='${ve_first_name}' `
                     } else {
                         condition += `,ve_first_name='${ve_first_name}'`
+                    }
+                }
+                if (ve_tax_treatment) {
+                    if (condition == '') {
+                        condition = `set ve_tax_treatment ='${ve_tax_treatment}' `
+                    } else {
+                        condition += `,ve_tax_treatment='${ve_tax_treatment}'`
+                    }
+                }
+                if (ve_source_of_supply) {
+                    if (condition == '') {
+                        condition = `set ve_source_of_supply ='${ve_source_of_supply}' `
+                    } else {
+                        condition += `,ve_source_of_supply='${ve_source_of_supply}'`
                     }
                 }
                 if (ve_last_name) {
@@ -329,39 +343,43 @@ module.exports.EditVendor = async (req, res) => {
                     }
 
                     if (files.image) {
-                        if (Array.isArray(files.image)) {
+                        const uploadDir = path.join(process.cwd(), "uploads", "vendor_docs");
+                        // ✅ Ensure folder exists
+                        if (!fs.existsSync(uploadDir)) {
+                            fs.mkdirSync(uploadDir, { recursive: true }); // creates nested folders if needed
+                        }
 
-                            for (const file of files.image) {
-                                var oldPath = file.filepath;
-                                var newPath = process.cwd() + "/uploads/vendor_docs/" + file.originalFilename;
-                                let rawData = fs.readFileSync(oldPath);
+                        console.log(files, "filesssimage");
+
+                        let images = Array.isArray(files.image) ? files.image : [files.image];
+
+                        for (const file of images) {
+                            try {
+                                const oldPath = file.filepath;
+                                const fileName = file.originalFilename;
+
+                                const newPath = path.join(uploadDir, fileName);
+                                const rawData = fs.readFileSync(oldPath);
                                 fs.writeFileSync(newPath, rawData);
-                                var imagepath = ("/uploads/vendor_docs/" + file.originalFilename);
-                                var Insertimages = await model.AddImagesQuery(ve_id, imagepath)
-                                console.log(Insertimages);
-                                if (Insertimages.affectedRows == 0) {
+
+                                const imagePath = "/uploads/vendor_docs/" + fileName;
+
+                                const insertResult = await model.AddImagesQuery(vendor_id, imagePath);
+                                console.log(insertResult);
+
+                                if (insertResult.affectedRows === 0) {
                                     return res.send({
                                         result: false,
-                                        message: "failed to add Vendor document"
-                                    })
+                                        message: "Failed to add vendor document."
+                                    });
                                 }
 
-                            }
-                        } else {
-                            var oldPath = files.image.filepath;
-                            var newPath = process.cwd() + "/uploads/vendor_docs/" + files.image.originalFilename
-                            let rawData = fs.readFileSync(oldPath);
-                            // console.log(oldPath, "qqq");
-
-                            fs.writeFileSync(newPath, rawData)
-                            var imagepath = "/uploads/vendor_docs/" + files.image.originalFilename
-                            var Insertimages = await model.AddImagesQuery(ve_id, imagepath)
-                            console.log(Insertimages);
-                            if (Insertimages.affectedRows == 0) {
-                                return res.send({
+                            } catch (err) {
+                                console.error("File processing error:", err);
+                                return res.status(500).send({
                                     result: false,
-                                    message: "failed to add Vendor document"
-                                })
+                                    message: "Server error while processing the file."
+                                });
                             }
                         }
                     }
@@ -383,8 +401,7 @@ module.exports.EditVendor = async (req, res) => {
             }
         })
 
-    } catch
-    (error) {
+    } catch (error) {
         console.log(error);
 
         return res.send({
