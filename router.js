@@ -93,6 +93,9 @@ route.post('/delete/bank-details', verifyToken, DeleteBankDetails)
 var { AddVendors } = require("./controller/purchase/addvendor")
 route.post('/add/vendors', verifyToken, AddVendors)
 
+var { EditVendor } = require("./controller/purchase/editvendor");
+route.post('/edit/vendor', verifyToken, EditVendor)
+
 var { ListVendors } = require("./controller/purchase/listvendor")
 route.post('/list/vendors', verifyToken, ListVendors)
 
@@ -102,8 +105,6 @@ route.post('/delete/vendors', verifyToken, DeleteVendors)
 var { DeleteCustomerContactPerson } = require("./controller/sales/deletecustcontperson");
 route.post('/delete/customer-contact-person', verifyToken, DeleteCustomerContactPerson)
 
-var { EditVendor } = require("./controller/purchase/editvendor");
-route.post('/edit/vendor', verifyToken, EditVendor)
 
 var { EditVendorBankDetails } = require("./controller/purchase/editvendorbankdetails");
 route.post('/edit/vendor-bank-details', verifyToken, EditVendorBankDetails)
