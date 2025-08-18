@@ -42,3 +42,49 @@ module.exports.DeleteVendors = async (req, res) => {
         })
     }
 };
+
+
+module.exports.DeleteVendorDocuments = async (req, res) => {
+    try {
+        let { u_id } = req.user;
+        let { vendor_id, document_id } = req.body;
+        if (!vendor_id || !document_id) {
+            return res.send({
+                result: false,
+                message: "Vendor id and Document id are required."
+            })
+        }
+        let checkVendor = await model.CheckVendors(vendor_id, u_id);
+        if (checkVendor.length === 0) {
+            return res.send({
+                result: false,
+                message: "Vendor does not exist."
+            })
+        }
+        let checkDocument = await model.CheckVendorDocuments(document_id, vendor_id);
+        if (checkDocument.length === 0) {
+            return res.send({
+                result: false,
+                message: "Document does not exist."
+            })
+        }
+        let deleteDocument = await model.DeleteVendorDocuments(document_id, vendor_id);
+        if (deleteDocument.affectedRows > 0) {
+            return res.send({
+                result: true,
+                message: "Vendor document deleted successfully."
+            })
+        } else {
+            return res.send({
+                result: false,
+                message: "Failed to delete vendor document."
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        return res.send({
+            result: false,
+            message: error.message
+        })
+    }
+}

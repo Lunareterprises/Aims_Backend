@@ -8,6 +8,18 @@ module.exports.CheckVendors = async (vendor_id, user_id) => {
     return data;
 };
 
+module.exports.CheckVendorDocuments = async (document_id, vendor_id) => {
+    var Query = `select * from puchase_documents where pd_vendor_id = ? and pd_id = ?`;
+    var data = await query(Query, [vendor_id, document_id]);
+    return data;
+}
+
+module.exports.DeleteVendorDocuments = async (document_id, vendor_id) => {
+    var Query = `DELETE FROM puchase_documents WHERE pd_id = ? and pd_vendor_id = ?`;
+    var data = await query(Query, [document_id, vendor_id]);
+    return data;
+}
+
 module.exports.RemoveVendors = async (vendor_id, user_id) => {
     var Query = `DELETE FROM vendors WHERE ve_id = ? and ve_user_id =?`;
     var data = await query(Query, [vendor_id, user_id]);
