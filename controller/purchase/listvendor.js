@@ -26,19 +26,30 @@ module.exports.ListVendors = async (req, res) => {
 
         var data = await Promise.all(
             listVendors.map(async (el) => {
-                let vendor_id = el.ve_id;
+                try {
+                    let vendor_id = el?.ve_id;
+                    let getcontactperson = await model.GetContactPersons(vendor_id);
+                    let getbankdetails = await model.GetBankDetails(vendor_id);
+                    let getdocuments = await model.GetDocuments(vendor_id);
 
-                let getcontactperson = await model.GetContactPersons(vendor_id)
-                let getbankdetails = await model.GetBankDetails(vendor_id)
-                let getdocuments = await model.GetDocuments(vendor_id)
-                console.log(getcontactperson, "ccc");
-
-                el.contact_persons = getcontactperson;
-                el.bank_details = getbankdetails;
-                el.documents = getdocuments;
-                return el
+                    return {
+                        ...el,
+                        contact_persons: getcontactperson,
+                        bank_details: getbankdetails,
+                        documents: getdocuments
+                    };
+                } catch (err) {
+                    console.error(`Error fetching data for vendor ${el?.ve_id}:`, err);
+                    return {
+                        ...el,
+                        contact_persons: [],
+                        bank_details: [],
+                        documents: [],
+                        error: true
+                    };
+                }
             })
-        )
+        );
         return res.send({
             result: true,
             message: "Data retrived",
