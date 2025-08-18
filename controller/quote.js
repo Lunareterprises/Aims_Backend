@@ -57,8 +57,9 @@ module.exports.CreateQuote = async (req, res) => {
             }
             let createQuote = await model.CreateQuote(customer_id, supply_place, tax_treatment, number, reference, date, expiry_date, sales_person_id, project_id, subject, tax_preference, notes, terms_condition, template, sub_total, discount, shipping_charge, adjustment, tcs_tds, tcs_tds_id, total, u_id);
             if (createQuote.affectedRows > 0) {
-                if (items && items.length > 0) {
-                    for (let item of items) {
+                const parsedItems = JSON.parse(items)
+                if (parsedItems && parsedItems.length > 0) {
+                    for (let item of parsedItems) {
                         const { item_id, description, quantity, rate, discount, discount_type, tax_id, amount } = item
                         let itemData = await model.CheckItem(item_id, u_id)
                         if (itemData.length == 0) {
@@ -175,8 +176,9 @@ module.exports.UpdateQuote = async (req, res) => {
             }
             let updatedQuote = await model.UpdateQuote(supply_place, tax_treatment, number, reference, expiry_date, sales_person_id, project_id, subject, tax_preference, notes, terms_condition, template, sub_total, discount, shipping_charge, adjustment, tcs_tds, tcs_tds_id, total, quote_id);
             if (updatedQuote.affectedRows > 0) {
-                if (items && items.length > 0) {
-                    for (let item of items) {
+                const parsedItems = JSON.parse(items)
+                if (parsedItems && parsedItems.length > 0) {
+                    for (let item of parsedItems) {
                         const { qi_id, item_id, description, quantity, rate, discount, discount_type, tax_id, amount } = item
                         if (tax_id) {
                             let taxData = await model.CheckTax(tax_id, u_id)
@@ -210,8 +212,8 @@ module.exports.UpdateQuote = async (req, res) => {
                                     message: "Item not found. Invalid item id."
                                 })
                             }
+                            await model.InsertItems(item_id, description, quantity, rate, discount, discount_type, tax_id, amount, createQuote.insertId)
                         }
-                        await model.InsertItems(item_id, description, quantity, rate, discount, discount_type, tax_id, amount, createQuote.insertId)
                     }
                 }
                 const uploadDir = path.join(process.cwd(), 'uploads', 'files');

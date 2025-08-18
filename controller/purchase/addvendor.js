@@ -14,13 +14,13 @@ module.exports.AddVendors = async (req, res) => {
                     data: err,
                 });
             }
-            var { ve_salutation, ve_first_name, ve_last_name, ve_company_name, ve_display_name,
+            var { ve_salutation, ve_first_name, ve_last_name, ve_company_name, ve_display_name, ve_tax_treatment, ve_source_of_supply,
                 ve_email, ve_phone, ve_mobile, ve_pan_no, ve_msme_reg, ve_currency, ve_opening_balance, ve_payment_terms,
                 ve_tds, ve_enable_portal, ve_portal_language, ve_department, ve_designation, ve_website, ve_remarks,
                 ve_b_addr_attention, ve_b_addr_country, ve_b_addr_address, ve_b_addr_city, ve_b_addr_state, ve_b_addr_pincode,
                 ve_b_addr_phone, ve_b_addr_fax_number, ve_s_addr_attention, ve_s_addr_country, ve_s_addr_address, ve_s_addr_city,
                 ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number, contact_persons, bank_details } = fields;
-            if ( !ve_salutation || !ve_first_name || !ve_last_name || !ve_company_name || !ve_display_name || !ve_email) {
+            if (!ve_salutation || !ve_first_name || !ve_last_name || !ve_company_name || !ve_display_name || !ve_email) {
                 return res.send({
                     result: false,
                     message: "Insufficient parameters"
@@ -38,7 +38,7 @@ module.exports.AddVendors = async (req, res) => {
                 ve_tds, ve_enable_portal, ve_portal_language, ve_department, ve_designation, ve_website, ve_remarks,
                 ve_b_addr_attention, ve_b_addr_country, ve_b_addr_address, ve_b_addr_city, ve_b_addr_state, ve_b_addr_pincode,
                 ve_b_addr_phone, ve_b_addr_fax_number, ve_s_addr_attention, ve_s_addr_country, ve_s_addr_address, ve_s_addr_city,
-                ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number);
+                ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number, ve_tax_treatment, ve_source_of_supply);
 
 
             if (addvendor.affectedRows > 0) {
@@ -63,9 +63,6 @@ module.exports.AddVendors = async (req, res) => {
                 }
 
                 // Now `contactPersons` will be an empty array if input is invalid or couldn't be parsed
-
-                console.log(contactPersons, "c_person");
-
                 for (const el of contactPersons) {
                     await model.InsertContactPerson(vendor_id, el);
                 }
@@ -87,58 +84,51 @@ module.exports.AddVendors = async (req, res) => {
                 }
 
                 // Now `bankDetails` will be an empty array if input is invalid or couldn't be parsed
-
-                console.log(bankDetails, "bank");
-
                 for (const el of bankDetails) {
                     await model.InserBankDetails(vendor_id, el);
                 }
 
 
                 if (files.image) {
+                    const uploadDir = path.join(process.cwd(), "uploads", "vendor_docs");
+                    // ✅ Ensure folder exists
+                    if (!fs.existsSync(uploadDir)) {
+                        fs.mkdirSync(uploadDir, { recursive: true }); // creates nested folders if needed
+                    }
+
                     console.log(files, "filesssimage");
 
+                    let images = Array.isArray(files.image) ? files.image : [files.image];
 
-                    if (Array.isArray(files.image)) {
+                    for (const file of images) {
+                        try {
+                            const oldPath = file.filepath;
+                            const fileName = file.originalFilename;
 
-                        for (const file of files.image) {
-                            var oldPath = file.filepath;
-                            var newPath = process.cwd() + "/uploads/vendor_docs/" + file.originalFilename;
-                            let rawData = fs.readFileSync(oldPath);
+                            const newPath = path.join(uploadDir, fileName);
+                            const rawData = fs.readFileSync(oldPath);
                             fs.writeFileSync(newPath, rawData);
-                            var imagepath = ("/uploads/vendor_docs/" + file.originalFilename);
-                            var Insertimages = await model.AddImagesQuery(vendor_id, imagepath)
-                            console.log(Insertimages);
-                            if (Insertimages.affectedRows == 0) {
+
+                            const imagePath = "/uploads/vendor_docs/" + fileName;
+
+                            const insertResult = await model.AddImagesQuery(vendor_id, imagePath);
+                            console.log(insertResult);
+
+                            if (insertResult.affectedRows === 0) {
                                 return res.send({
                                     result: false,
-                                    message: "failed to add Vendor document"
-                                })
+                                    message: "Failed to add vendor document."
+                                });
                             }
 
-                        }
-                    } else {
-                        var oldPath = files.image.filepath;
-                        var newPath = process.cwd() + "/uploads/vendor_docs/" + files.image.originalFilename
-                        let rawData = fs.readFileSync(oldPath);
-                        // console.log(oldPath, "qqq");
-
-                        fs.writeFileSync(newPath, rawData)
-                        var imagepath = "/uploads/vendor_docs/" + files.image.originalFilename
-                        var Insertimages = await model.AddImagesQuery(vendor_id, imagepath)
-                        console.log(Insertimages);
-                        if (Insertimages.affectedRows == 0) {
-                            return res.send({
+                        } catch (err) {
+                            console.error("File processing error:", err);
+                            return res.status(500).send({
                                 result: false,
-                                message: "failed to add Vendor document"
-                            })
+                                message: "Server error while processing the file."
+                            });
                         }
                     }
-                    return res.send({
-                        result: true,
-                        message: "Vendor added successfully"
-                    })
-
                 }
                 return res.send({
                     result: true,
@@ -150,7 +140,6 @@ module.exports.AddVendors = async (req, res) => {
                     message: "Failed to add Vendor"
                 })
             }
-
         })
     } catch (error) {
         console.log(error);

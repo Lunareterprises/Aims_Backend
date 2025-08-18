@@ -13,7 +13,7 @@ module.exports.AddVendor = async (user_id, ve_salutation, ve_first_name, ve_last
     ve_tds, ve_enable_portal, ve_portal_language, ve_department, ve_designation, ve_website, ve_remarks,
     ve_b_addr_attention, ve_b_addr_country, ve_b_addr_address, ve_b_addr_city, ve_b_addr_state, ve_b_addr_pincode,
     ve_b_addr_phone, ve_b_addr_fax_number, ve_s_addr_attention, ve_s_addr_country, ve_s_addr_address, ve_s_addr_city,
-    ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number) => {
+    ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number, ve_tax_treatment, ve_source_of_supply,) => {
 
     try {
         var Query = `INSERT INTO vendors (ve_user_id, ve_salutation, ve_first_name, ve_last_name, ve_company_name,
@@ -21,15 +21,15 @@ module.exports.AddVendor = async (user_id, ve_salutation, ve_first_name, ve_last
         ve_payment_terms, ve_tds, ve_enable_portal, ve_portal_language, ve_department, ve_designation, ve_website,
         ve_remarks, ve_b_addr_attention, ve_b_addr_country, ve_b_addr_address, ve_b_addr_city, ve_b_addr_state, 
         ve_b_addr_pincode, ve_b_addr_phone, ve_b_addr_fax_number, ve_s_addr_attention, ve_s_addr_country, ve_s_addr_address,
-        ve_s_addr_city, ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+        ve_s_addr_city, ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number,ve_tax_treatment,ve_source_of_supply)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
         var data = await query(Query, [user_id, ve_salutation, ve_first_name, ve_last_name, ve_company_name, ve_display_name,
             ve_email, ve_phone, ve_mobile, ve_pan_no, ve_msme_reg, ve_currency, ve_opening_balance, ve_payment_terms,
             ve_tds, ve_enable_portal, ve_portal_language, ve_department, ve_designation, ve_website, ve_remarks,
             ve_b_addr_attention, ve_b_addr_country, ve_b_addr_address, ve_b_addr_city, ve_b_addr_state, ve_b_addr_pincode,
             ve_b_addr_phone, ve_b_addr_fax_number, ve_s_addr_attention, ve_s_addr_country, ve_s_addr_address, ve_s_addr_city,
-            ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number]);
+            ve_s_addr_state, ve_s_addr_pincode, ve_s_addr_phone, ve_s_addr_fax_number, ve_tax_treatment, ve_source_of_supply,]);
 
         return data;
     } catch (error) {

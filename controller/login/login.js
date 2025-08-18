@@ -17,7 +17,6 @@ module.exports.Login = async (req, res) => {
                 message: "insufficient parameters",
             });
         }
-        var SECRET_KEY = "dkjghkdghfhglknghdxlkdnflsfjopoijoigjhpokp";
         let CheckUser = await model.CheckUserQuery(email);
 
         if (CheckUser.length > 0) {
@@ -33,7 +32,7 @@ module.exports.Login = async (req, res) => {
 
                 const token = jwt.sign(
                     payload,
-                    SECRET_KEY,
+                    process.env.SECRET_KEY,
                     {}
                 );
                 let changeloginstatus = await model.ChangeLoginStatus(CheckUser[0]?.u_id, email)
